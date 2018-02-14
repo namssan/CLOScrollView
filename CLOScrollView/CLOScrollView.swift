@@ -22,6 +22,8 @@ class CLOScrollView: UIView {
         // Drawing code
     }
     */
+    private let kUSER_VIEW_TAG = 1234
+    
     private var containers : [UIView] = []
     private var numberOfItems : Int = 0
     var curItemIndex : Int = 0
@@ -94,10 +96,26 @@ class CLOScrollView: UIView {
         for idx in 0..<numberOfLoads {
             let container = self.containers[idx]
             container.tag = idx
-            if let sb = self.dataSource?.itemView(at: idx) {
+            if let sb = self.getUserItemView(idx: idx) {
                 container.addSubview(sb)
             }
         }
+    }
+    
+    func scrollToItem(at idx : Int, animated : Bool) {
+        
+        guard idx >= 0 && idx < numberOfItems else { return }
+        
+        let W = self.frame.size.width
+        let H = self.frame.size.height
+        
+        let offY = H * CGFloat(idx)
+        let rect = CGRect(x: 0.0, y: offY, width: W, height: H)
+        self.scrollView?.scrollRectToVisible(rect, animated: animated)
+        
+//        UIView.animate(withDuration: 0.5) {
+//            self.scrollView?.contentOffset.y = offY
+//        }
     }
     
     private func chooseVictimContainer(idx : Int) -> UIView {
@@ -114,6 +132,25 @@ class CLOScrollView: UIView {
         }
         
         return container!
+    }
+    
+    private func getUserItemView(idx : Int) -> UIView? {
+    
+        if let view = self.dataSource?.itemView(at: idx) {
+            view.tag = kUSER_VIEW_TAG
+            return view
+        }
+        return nil
+    }
+    
+    private func removeUserItemView(view : UIView) {
+        
+        for sb in view.subviews {
+            if(sb.tag == kUSER_VIEW_TAG) {
+                sb.removeFromSuperview()
+                return
+            }
+        }
     }
     
     private func loadItems(at idx : Int) {
@@ -137,7 +174,8 @@ class CLOScrollView: UIView {
                 victim.tag = prevIdx
                 victim.frame.origin.y = CGFloat(prevIdx) * H
                 
-                if let sb = self.dataSource?.itemView(at: prevIdx) {
+                if let sb = self.getUserItemView(idx: prevIdx) {
+                    self.removeUserItemView(view: victim)
                     victim.addSubview(sb)
                 }
             }
@@ -157,7 +195,8 @@ class CLOScrollView: UIView {
                 victim.tag = nextIdx
                 victim.frame.origin.y = CGFloat(nextIdx) * H
                 
-                if let sb = self.dataSource?.itemView(at: nextIdx) {
+                if let sb = self.getUserItemView(idx: nextIdx) {
+                    self.removeUserItemView(view: victim)
                     victim.addSubview(sb)
                 }
             }

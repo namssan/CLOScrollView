@@ -24,6 +24,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        DispatchQueue.main.asyncAfter(deadline: .now()+1.5) {
+            self.swipeView.scrollToItem(at: 100, animated: true)
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -37,6 +41,7 @@ class ViewController: UIViewController {
         super.viewDidLayoutSubviews()
         
         _ = self.swipeView
+        
     }
 }
 
